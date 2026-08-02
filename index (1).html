@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paul media - Intranet</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Ecran de Connexion */
+        #login-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #0f172a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .login-card {
+            background-color: #1e293b;
+            padding: 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            width: 320px;
+            text-align: center;
+            border: 1px solid #334155;
+        }
+
+        .login-card h2 {
+            margin-bottom: 1.5rem;
+            color: #38bdf8;
+        }
+
+        .login-card input {
+            width: 100%;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            border-radius: 6px;
+            border: 1px solid #334155;
+            background-color: #0f172a;
+            color: #fff;
+        }
+
+        .login-card button {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 6px;
+            border: none;
+            background-color: #0284c7;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .login-card button:hover {
+            background-color: #0369a1;
+        }
+
+        /* Layout Principal */
+        #app {
+            display: none;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Sidebar */
+        aside {
+            width: 260px;
+            background-color: #1e293b;
+            border-right: 1px solid #334155;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand {
+            padding: 1.5rem;
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #38bdf8;
+            border-bottom: 1px solid #334155;
+        }
+
+        nav {
+            flex: 1;
+            padding: 1rem 0;
+        }
+
+        nav button {
+            width: 100%;
+            padding: 0.8rem 1.5rem;
+            background: none;
+            border: none;
+            color: #94a3b8;
+            text-align: left;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        nav button:hover, nav button.active {
+            background-color: #334155;
+            color: #38bdf8;
+            border-left: 4px solid #38bdf8;
+        }
+
+        .user-profile {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #334155;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Contenu Principal */
+        main {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            color: #f8fafc;
+        }
+
+        /* Cartes & Conteneurs */
+        .card {
+            background-color: #1e293b;
+            border-radius: 8px;
+            padding: 1.5rem;
+            border: 1px solid #334155;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        /* Formulaires & Boutons */
+        input, select, textarea {
+            width: 100%;
+            padding: 0.6rem;
+            border-radius: 6px;
+            border: 1px solid #334155;
+            background-color: #0f172a;
+            color: #fff;
+            margin-bottom: 0.8rem;
+        }
+
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            border: none;
+            background-color: #0284c7;
+            color: white;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .btn:hover { background-color: #0369a1; }
+        .btn-danger { background-color: #ef4444; }
+        .btn-danger:hover { background-color: #dc2626; }
+        .btn-sm { padding: 0.3rem 0.6rem; font-size: 0.85rem; }
+
+        /* Actions 3 points (...) */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropbtn {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0 5px;
+        }
+
+        .dropbtn:hover { color: #fff; }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: #0f172a;
+            min-width: 140px;
+            box-shadow: 0px 8px 16px rgba(0,0,0,0.4);
+            border: 1px solid #334155;
+            border-radius: 6px;
+            z-index: 10;
+        }
+
+        .dropdown-content button {
+            color: #f8fafc;
+            padding: 8px 12px;
+            text-decoration: none;
+            display: block;
+            width: 100%;
+            text-align: left;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .dropdown-content button:hover {
+            background-color: #1e293b;
+            color: #38bdf8;
+        }
+
+        .dropdown:hover .dropdown-content { display: block; }
+
+        /* Lists & Tables */
+        ul { list-style: none; }
+        li { padding: 0.4rem 0; border-bottom: 1px solid #334155; }
+        li:last-child { border-bottom: none; }
+
+        /* Modals */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+
+        .modal-content {
+            background: #1e293b;
+            padding: 2rem;
+            border-radius: 8px;
+            width: 400px;
+            border: 1px solid #334155;
+        }
+
+        .member-checkboxes {
+            max-height: 150px;
+            overflow-y: auto;
+            margin-bottom: 1rem;
+            background: #0f172a;
+            padding: 0.5rem;
+            border-radius: 6px;
+        }
+        
+        .member-checkboxes label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 5px;
+            cursor: pointer;
+        }
+        .member-checkboxes input { width: auto; margin: 0; }
+    </style>
+</head>
+<body>
+
+    <!-- Connexion -->
+    <div id="login-screen">
+        <div class="login-card">
+            <h2>Paul media</h2>
+            <input type="text" id="username" placeholder="Identifiant">
+            <input type="password" id="password" placeholder="Mot de passe">
+            <button onclick="login()">Se connecter</button>
+            <p id="login-error" style="color: #ef4444; margin-top: 1rem; font-size: 0.85rem;"></p>
+        </div>
+    </div>
+
+    <!-- Interface Principale -->
+    <div id="app">
+        <aside>
+            <div class="brand">Paul media</div>
+            <nav>
+                <button class="active" onclick="showSection('compta')">📊 Compta Semaine</button>
+                <button onclick="showSection('equipes')">👥 Équipes</button>
+                <button onclick="showSection('contrats')">📄 Gestion des Contrats</button>
+                <button onclick="showSection('membres')">👤 Membres</button>
+            </nav>
+            <div class="user-profile">
+                <div>
+                    <strong id="user-display-name">LUIZ</strong><br>
+                    <small style="color: #94a3b8;">PDG</small>
+                </div>
+                <button class="btn btn-sm btn-danger" onclick="logout()">Déconnexion</button>
+            </div>
+        </aside>
+
+        <main>
+            <!-- 1. COMPTA SEMAINE -->
+            <div id="sec-compta" class="section active">
+                <h1>Comptabilité de la Semaine</h1>
+                <div class="card">
+                    <h2>Résumé financier par équipe</h2>
+                    <div id="compta-summary" style="margin-top: 1rem;">
+                        <!-- Généré dynamiquement -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. ÉQUIPES -->
+            <div id="sec-equipes" class="section">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h1>Gestion des Équipes</h1>
+                    <button class="btn" onclick="openCreateTeamModal()">+ Créer une Équipe</button>
+                </div>
+                <div class="grid" id="teams-grid">
+                    <!-- Généré dynamiquement -->
+                </div>
+            </div>
+
+            <!-- 3. GESTION DES CONTRATS -->
+            <div id="sec-contrats" class="section">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h1>Gestion des Contrats</h1>
+                    <button class="btn" onclick="openCreateContractModal()">+ Nouveau Contrat</button>
+                </div>
+                <div class="grid" id="contracts-grid">
+                    <!-- Généré dynamiquement -->
+                </div>
+            </div>
+
+            <!-- 4. MEMBRES -->
+            <div id="sec-membres" class="section">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h1>Gestion de l'Effectif</h1>
+                    <button class="btn" onclick="openAddMemberModal()">+ Ajouter un Membre</button>
+                </div>
+                <div class="card">
+                    <ul id="members-list">
+                        <!-- Généré dynamiquement -->
+                    </ul>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODALS -->
+
+    <!-- Modal Équipe (Création / Édition) -->
+    <div id="team-modal" class="modal">
+        <div class="modal-content">
+            <h3 id="team-modal-title">Créer une Équipe</h3><br>
+            <input type="hidden" id="team-edit-id">
+            <label>Nom de l'équipe</label>
+            <input type="text" id="team-name-input" placeholder="ex: Équipe Investigation">
+            <label>Argent rapporté ($)</label>
+            <input type="number" id="team-revenue-input" value="0">
+            <label>Membres de l'équipe</label>
+            <div class="member-checkboxes" id="team-members-checkboxes"></div>
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button class="btn btn-danger" onclick="closeModal('team-modal')">Annuler</button>
+                <button class="btn" onclick="saveTeam()">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Contrat (Création / Édition) -->
+    <div id="contract-modal" class="modal">
+        <div class="modal-content">
+            <h3 id="contract-modal-title">Créer un Contrat</h3><br>
+            <input type="hidden" id="contract-edit-id">
+            <label>Titre / Employé</label>
+            <input type="text" id="contract-title-input" placeholder="ex: Contrat de LUIZ">
+            <label>Type de poste</label>
+            <input type="text" id="contract-role-input" placeholder="ex: Journaliste senior">
+            <label>Contenu / Termes du contrat</label>
+            <textarea id="contract-text-input" rows="4" placeholder="Termes du contrat..."></textarea>
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button class="btn btn-danger" onclick="closeModal('contract-modal')">Annuler</button>
+                <button class="btn" onclick="saveContract()">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Membre -->
+    <div id="member-modal" class="modal">
+        <div class="modal-content">
+            <h3>Ajouter un Membre</h3><br>
+            <label>Nom complet</label>
+            <input type="text" id="member-name-input" placeholder="ex: Jean Dupont">
+            <label>Rôle</label>
+            <input type="text" id="member-role-input" placeholder="ex: Cadreur">
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button class="btn btn-danger" onclick="closeModal('member-modal')">Annuler</button>
+                <button class="btn" onclick="saveMember()">Ajouter</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- BASE DE DONNÉES RÉINITIALISÉE ---
+        let members = [
+            { id: 1, name: "LUIZ", role: "PDG" }
+        ];
+
+        let teams = [];
+        let contracts = [];
+
+        // --- AUTHENTIFICATION ---
+        function login() {
+            const u = document.getElementById('username').value;
+            const p = document.getElementById('password').value;
+            const err = document.getElementById('login-error');
+
+            if (u === "LUIZ" && p === "1201") {
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('app').style.display = 'flex';
+                renderAll();
+            } else {
+                err.innerText = "Identifiant ou mot de passe incorrect.";
+            }
+        }
+
+        function logout() {
+            document.getElementById('app').style.display = 'none';
+            document.getElementById('login-screen').style.display = 'flex';
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+        }
+
+        // --- NAVIGATION ---
+        function showSection(id) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+            
+            document.getElementById(`sec-${id}`).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+
+        // --- RENDUS DYNAMIQUES ---
+        function renderAll() {
+            renderCompta();
+            renderTeams();
+            renderContracts();
+            renderMembers();
+        }
+
+        // 1. COMPTA
+        function renderCompta() {
+            const container = document.getElementById('compta-summary');
+            if (teams.length === 0) {
+                container.innerHTML = "<p style='color: #94a3b8;'>Aucune équipe enregistrée pour le moment.</p>";
+                return;
+            }
+
+            let total = 0;
+            let html = '<table style="width: 100%; border-collapse: collapse; text-align: left;">';
+            html += '<tr style="border-bottom: 1px solid #334155; color: #38bdf8;"><th style="padding: 8px;">Équipe</th><th style="padding: 8px;">Revenus</th></tr>';
+            
+            teams.forEach(t => {
+                total += parseFloat(t.revenue || 0);
+                html += `<tr style="border-bottom: 1px solid #334155;">
+                    <td style="padding: 8px;">${t.name}</td>
+                    <td style="padding: 8px; color: #4ade80;">${t.revenue || 0} $</td>
+                </tr>`;
+            });
+
+            html += `<tr style="font-weight: bold; font-size: 1.1rem;">
+                <td style="padding: 12px 8px;">TOTAL SEMAINE</td>
+                <td style="padding: 12px 8px; color: #4ade80;">${total} $</td>
+            </tr>`;
+            html += '</table>';
+
+            container.innerHTML = html;
+        }
+
+        // 2. ÉQUIPES
+        function renderTeams() {
+            const grid = document.getElementById('teams-grid');
+            grid.innerHTML = '';
+
+            if (teams.length === 0) {
+                grid.innerHTML = "<p style='color: #94a3b8;'>Aucune équipe créée. Cliquez sur '+ Créer une Équipe'.</p>";
+                return;
+            }
+
+            teams.forEach(t => {
+                const teamMembersNames = t.memberIds
+                    .map(id => members.find(m => m.id === id)?.name)
+                    .filter(Boolean)
+                    .join(', ') || 'Aucun membre';
+
+                grid.innerHTML += `
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>${t.name}</h3>
+                            <div class="dropdown">
+                                <button class="dropbtn">&#8226;&#8226;&#8226;</button>
+                                <div class="dropdown-content">
+                                    <button onclick="openEditTeamModal(${t.id})">Modifier</button>
+                                    <button onclick="deleteTeam(${t.id})" style="color: #ef4444;">Supprimer</button>
+                                </div>
+                            </div>
+                        </div>
+                        <p style="margin-bottom: 0.5rem; color: #94a3b8;"><strong>Membres :</strong> ${teamMembersNames}</p>
+                        <p style="color: #4ade80; font-weight: bold;">Rapporté : ${t.revenue} $</p>
+                    </div>
+                `;
+            });
+        }
+
+        function openCreateTeamModal() {
+            document.getElementById('team-modal-title').innerText = "Créer une Équipe";
+            document.getElementById('team-edit-id').value = "";
+            document.getElementById('team-name-input').value = "";
+            document.getElementById('team-revenue-input').value = 0;
+            populateMemberCheckboxes([]);
+            document.getElementById('team-modal').style.display = 'flex';
+        }
+
+        function openEditTeamModal(id) {
+            const team = teams.find(t => t.id === id);
+            if (!team) return;
+
+            document.getElementById('team-modal-title').innerText = "Modifier l'Équipe";
+            document.getElementById('team-edit-id').value = team.id;
+            document.getElementById('team-name-input').value = team.name;
+            document.getElementById('team-revenue-input').value = team.revenue;
+            populateMemberCheckboxes(team.memberIds);
+            document.getElementById('team-modal').style.display = 'flex';
+        }
+
+        function populateMemberCheckboxes(selectedIds) {
+            const container = document.getElementById('team-members-checkboxes');
+            container.innerHTML = '';
+            members.forEach(m => {
+                const checked = selectedIds.includes(m.id) ? 'checked' : '';
+                container.innerHTML += `
+                    <label>
+                        <input type="checkbox" value="${m.id}" ${checked}> ${m.name} (${m.role})
+                    </label>
+                `;
+            });
+        }
+
+        function saveTeam() {
+            const id = document.getElementById('team-edit-id').value;
+            const name = document.getElementById('team-name-input').value.trim();
+            const revenue = parseFloat(document.getElementById('team-revenue-input').value) || 0;
+            
+            const selectedMembers = [];
+            document.querySelectorAll('#team-members-checkboxes input:checked').forEach(cb => {
+                selectedMembers.push(parseInt(cb.value));
+            });
+
+            if (!name) return alert("Veuillez donner un nom à l'équipe.");
+
+            if (id) {
+                // Modification
+                const team = teams.find(t => t.id === parseInt(id));
+                if (team) {
+                    team.name = name;
+                    team.revenue = revenue;
+                    team.memberIds = selectedMembers;
+                }
+            } else {
+                // Création
+                teams.push({
+                    id: Date.now(),
+                    name: name,
+                    revenue: revenue,
+                    memberIds: selectedMembers
+                });
+            }
+
+            closeModal('team-modal');
+            renderAll();
+        }
+
+        function deleteTeam(id) {
+            if (confirm("Voulez-vous vraiment supprimer cette équipe ?")) {
+                teams = teams.filter(t => t.id !== id);
+                renderAll();
+            }
+        }
+
+        // 3. CONTRATS
+        function renderContracts() {
+            const grid = document.getElementById('contracts-grid');
+            grid.innerHTML = '';
+
+            if (contracts.length === 0) {
+                grid.innerHTML = "<p style='color: #94a3b8;'>Aucun contrat rédigé. Cliquez sur '+ Nouveau Contrat'.</p>";
+                return;
+            }
+
+            contracts.forEach(c => {
+                grid.innerHTML += `
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>${c.title}</h3>
+                            <div class="dropdown">
+                                <button class="dropbtn">&#8226;&#8226;&#8226;</button>
+                                <div class="dropdown-content">
+                                    <button onclick="openEditContractModal(${c.id})">Modifier</button>
+                                    <button onclick="deleteContract(${c.id})" style="color: #ef4444;">Supprimer</button>
+                                </div>
+                            </div>
+                        </div>
+                        <p style="color: #38bdf8; font-size: 0.9rem; margin-bottom: 0.5rem;">${c.role}</p>
+                        <p style="color: #cbd5e1; white-space: pre-line; font-size: 0.9rem; background: #0f172a; padding: 0.8rem; border-radius: 6px;">${c.text}</p>
+                    </div>
+                `;
+            });
+        }
+
+        function openCreateContractModal() {
+            document.getElementById('contract-modal-title').innerText = "Créer un Contrat";
+            document.getElementById('contract-edit-id').value = "";
+            document.getElementById('contract-title-input').value = "";
+            document.getElementById('contract-role-input').value = "";
+            document.getElementById('contract-text-input').value = "";
+            document.getElementById('contract-modal').style.display = 'flex';
+        }
+
+        function openEditContractModal(id) {
+            const c = contracts.find(item => item.id === id);
+            if (!c) return;
+
+            document.getElementById('contract-modal-title').innerText = "Modifier le Contrat";
+            document.getElementById('contract-edit-id').value = c.id;
+            document.getElementById('contract-title-input').value = c.title;
+            document.getElementById('contract-role-input').value = c.role;
+            document.getElementById('contract-text-input').value = c.text;
+            document.getElementById('contract-modal').style.display = 'flex';
+        }
+
+        function saveContract() {
+            const id = document.getElementById('contract-edit-id').value;
+            const title = document.getElementById('contract-title-input').value.trim();
+            const role = document.getElementById('contract-role-input').value.trim();
+            const text = document.getElementById('contract-text-input').value.trim();
+
+            if (!title) return alert("Veuillez renseigner un titre/employé.");
+
+            if (id) {
+                const c = contracts.find(item => item.id === parseInt(id));
+                if (c) {
+                    c.title = title;
+                    c.role = role;
+                    c.text = text;
+                }
+            } else {
+                contracts.push({
+                    id: Date.now(),
+                    title: title,
+                    role: role,
+                    text: text
+                });
+            }
+
+            closeModal('contract-modal');
+            renderContracts();
+        }
+
+        function deleteContract(id) {
+            if (confirm("Voulez-vous vraiment supprimer ce contrat ?")) {
+                contracts = contracts.filter(c => c.id !== id);
+                renderContracts();
+            }
+        }
+
+        // 4. MEMBRES
+        function renderMembers() {
+            const list = document.getElementById('members-list');
+            list.innerHTML = '';
+
+            members.forEach(m => {
+                list.innerHTML += `
+                    <li style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong>${m.name}</strong> - <span style="color: #94a3b8;">${m.role}</span>
+                        </div>
+                        ${m.name !== 'LUIZ' ? `<button class="btn btn-sm btn-danger" onclick="deleteMember(${m.id})">Retirer</button>` : '<span style="color: #38bdf8; font-size: 0.85rem;">(Vous)</span>'}
+                    </li>
+                `;
+            });
+        }
+
+        function openAddMemberModal() {
+            document.getElementById('member-name-input').value = "";
+            document.getElementById('member-role-input').value = "";
+            document.getElementById('member-modal').style.display = 'flex';
+        }
+
+        function saveMember() {
+            const name = document.getElementById('member-name-input').value.trim();
+            const role = document.getElementById('member-role-input').value.trim();
+
+            if (!name) return alert("Veuillez entrer un nom.");
+
+            members.push({
+                id: Date.now(),
+                name: name,
+                role: role || 'Membre'
+            });
+
+            closeModal('member-modal');
+            renderMembers();
+        }
+
+        function deleteMember(id) {
+            if (confirm("Retirer ce membre de l'entreprise ?")) {
+                members = members.filter(m => m.id !== id);
+                // Retirer également le membre des équipes
+                teams.forEach(t => {
+                    t.memberIds = t.memberIds.filter(mId => mId !== id);
+                });
+                renderAll();
+            }
+        }
+    </script>
+</body>
+</html>
